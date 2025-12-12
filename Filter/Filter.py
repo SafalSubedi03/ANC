@@ -1,18 +1,27 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import remez, freqz
-
+import soundfile as sf
 # ----------------------------
 # Signal setup
 # ----------------------------
-Fs = 1500
+x_n,Fs = sf.read("my_recording.wav")
+x_n = x_n[:,0] #left channel only
+
+
+#addnoise
+noise_amp = 0.2
+noise = noise_amp * np.random.randn(len(x_n))
+x_n = x_n + noise
+sf.write("NoiseAddedWave.wav",x_n,Fs)
+
 Ts = 1/Fs
-N = Fs
+N = len(x_n)
 n = np.arange(N)
 t = n * Ts
 
 # Test signal: combination of low and high frequencies
-x_n = 3*np.sin(2*np.pi*25*t) + 1.5*np.sin(2*np.pi*700*t)
+
 
 # ----------------------------
 # Window-based FIR class
@@ -40,7 +49,7 @@ class LowPassWindow:
 # Equiripple FIR class
 # ----------------------------
 class LowPassEquiripple:
-    def impulseResponse(self, fc, M, Fs, delta_f=0.05, weight_pass=1, weight_stop=10):
+    def impulseResponse(self, fc, M, Fs, delta_f=0.0005, weight_pass=0.1, weight_stop=10):
         # Convert cutoff and transition to normalized frequency (0-0.5)
         f_c = fc / Fs
         bands = [0, f_c, min(f_c + delta_f, 0.5), 0.5]
@@ -56,9 +65,9 @@ class LowPassEquiripple:
 # ----------------------------
 # Filter parameters
 # ----------------------------
-fc = 200                    # cutoff frequency (Hz)
+fc = 600                    # cutoff frequency (Hz)
 wc = 2*np.pi*fc / Fs        # for window-based FIR
-M = 201                     # filter length
+M = 501                     # filter length
 
 # ----------------------------
 # Window FIR filtering
@@ -70,7 +79,7 @@ y_window, h_window = lpf_window.Calculate_yn(x_n, wc, M)
 # Equiripple FIR filtering
 # ----------------------------
 lpf_equi = LowPassEquiripple()
-h_equi = lpf_equi.impulseResponse(fc, M, Fs, delta_f=0.05, weight_pass=1, weight_stop=10)
+h_equi = lpf_equi.impulseResponse(fc, M, Fs, delta_f=0.0005, weight_pass=1, weight_stop=10)
 y_equi = lpf_equi.Calculate_yn(x_n, h_equi)
 
 # ----------------------------
@@ -95,7 +104,7 @@ N_half = N // 2
 # ----------------------------
 # Plots
 # ----------------------------
-fig, axes = plt.subplots(4, 2, figsize=(14, 14))
+fig, axes = plt.subplots(4, 2, figsize=(8, 8))
 
 # Time domain signals
 axes[0,0].plot(t, x_n)
@@ -114,31 +123,31 @@ axes[1,0].set_xlabel("Time [s]")
 axes[1,0].set_ylabel("Amplitude")
 
 # Frequency domain signals (FFT)
-axes[1,1].plot(freq_axis[:N_half], np.abs(X_w[:N_half]))
+axes[1,1].plot(freq_axis[:N_half] / 1000, np.abs(X_w[:N_half]))
 axes[1,1].set_title("FFT of Original Signal")
-axes[1,1].set_xlabel("Frequency [Hz]")
+axes[1,1].set_xlabel("Frequency [KHz]")
 axes[1,1].set_ylabel("|X(f)|")
 
-axes[2,0].plot(freq_axis[:N_half], np.abs(Y_window_w[:N_half]))
+axes[2,0].plot(freq_axis[:N_half] / 1000, np.abs(Y_window_w[:N_half]))
 axes[2,0].set_title("FFT of Window FIR Filtered Signal")
-axes[2,0].set_xlabel("Frequency [Hz]")
+axes[2,0].set_xlabel("Frequency [KHz]")
 axes[2,0].set_ylabel("|Y(f)|")
 
-axes[2,1].plot(freq_axis[:N_half], np.abs(Y_equi_w[:N_half]))
+axes[2,1].plot(freq_axis[:N_half] / 1000, np.abs(Y_equi_w[:N_half]))
 axes[2,1].set_title("FFT of Equiripple FIR Filtered Signal")
-axes[2,1].set_xlabel("Frequency [Hz]")
+axes[2,1].set_xlabel("Frequency [KHz]")
 axes[2,1].set_ylabel("|Y(f)|")
 
 # Filter magnitude responses
-axes[3,0].plot(w_window, 20*np.log10(np.abs(H_window)))
+axes[3,0].plot(w_window / 1000, 20*np.log10(np.abs(H_window)))
 axes[3,0].set_title("Window FIR Magnitude Response (dB)")
-axes[3,0].set_xlabel("Frequency [Hz]")
+axes[3,0].set_xlabel("Frequency [KHz]")
 axes[3,0].set_ylabel("Magnitude [dB]")
 axes[3,0].grid(True)
 
-axes[3,1].plot(w_equi, 20*np.log10(np.abs(H_equi)))
+axes[3,1].plot(w_equi / 1000, 20*np.log10(np.abs(H_equi)))
 axes[3,1].set_title("Equiripple FIR Magnitude Response (dB)")
-axes[3,1].set_xlabel("Frequency [Hz]")
+axes[3,1].set_xlabel("Frequency [KHz]")
 axes[3,1].set_ylabel("Magnitude [dB]")
 axes[3,1].grid(True)
 
@@ -148,12 +157,15 @@ plt.show()
 # ----------------------------
 # Overlay magnitude response comparison
 # ----------------------------
-plt.figure(figsize=(10,5))
-plt.plot(w_window, 20*np.log10(np.abs(H_window)), label="Window FIR")
-plt.plot(w_equi, 20*np.log10(np.abs(H_equi)), label="Equiripple FIR")
-plt.title("FIR Filter Magnitude Response Comparison")
-plt.xlabel("Frequency [Hz]")
-plt.ylabel("Magnitude [dB]")
-plt.grid(True)
-plt.legend()
-plt.show()
+# plt.figure(figsize=(10,5))
+# plt.plot(w_window, 20*np.log10(np.abs(H_window)), label="Window FIR")
+# plt.plot(w_equi, 20*np.log10(np.abs(H_equi)), label="Equiripple FIR")
+# plt.title("FIR Filter Magnitude Response Comparison")
+# plt.xlabel("Frequency [Hz]")
+# plt.ylabel("Magnitude [dB]")
+# plt.grid(True)
+# plt.legend()
+# plt.show()
+
+sf.write("FilteredOutputUsingWindow.wav",y_window,Fs)
+sf.write("FilteredOutputUsingEqui.wav",y_equi,Fs)

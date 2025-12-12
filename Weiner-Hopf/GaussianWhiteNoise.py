@@ -16,12 +16,14 @@ def sinusoids(x,w = 2*np.pi*20):
 
 # --- Parameters ---
 Fs = 1000      # Sampling frequency
-N = Fs         # Number of samples (1 second)
-endpoint = 1   # seconds
+N = 500         # Number of samples (1 second)
+endpoint = 2   # seconds
 time_axis = np.arange(0, endpoint,1/Fs)
 noise = generate_gaussian_white_noise(0, 1, N)
 sin = sinusoids(time_axis)
 target = sin
+
+
 if __name__ == "__main__":
 
     # --- Manual Periodogram (one-sided) ---

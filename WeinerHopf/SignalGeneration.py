@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import welch
 
-# --- Generate Gaussian White Noise ---
+#  Generate Gaussian White Noise 
 def generate_gaussian_white_noise(mean=0, std_dev=1, num_samples=1000):
     if num_samples <= 0:
         raise ValueError("Number of samples must be positive.")
@@ -14,34 +14,34 @@ def generate_gaussian_white_noise(mean=0, std_dev=1, num_samples=1000):
 def sinusoids(x,w = 2*np.pi*20):
     return np.sin(w*x)
 
-# --- Parameters ---
+# Parameters 
 Fs = 1000      # Sampling frequency
 N = 500         # Number of samples (1 second)
 endpoint = 2   # seconds
 time_axis = np.arange(0, endpoint,1/Fs)
-noise = generate_gaussian_white_noise(0, 1, N)
+noise = generate_gaussian_white_noise(0, 1, len(time_axis))
 sin = sinusoids(time_axis)
-target = sin
+xn = sin + 0.3 * noise
 
 
 if __name__ == "__main__":
 
-    # --- Manual Periodogram (one-sided) ---
-    ft_target = np.fft.fft(target)
+    # Manual Periodogram (one-sided) 
+    ft_xn = np.fft.fft(xn)
     freqs = np.fft.fftfreq(N, 1/Fs)
-    Pxx = (1/Fs) * np.abs(ft_target)**2
+    Pxx = (1/Fs) * np.abs(ft_xn)**2
     Pxx_one = Pxx[:N//2].copy()
     Pxx_one[1:-1] *= 2             # double positive frequencies except DC & Nyquist
     freqs_one = freqs[:N//2]
 
-    # --- Welch PSD ---
-    f_welch, Pxx_welch = welch(target, fs=Fs, window='hann', nperseg=256, noverlap=128, scaling='density')
+    # Welch PSD 
+    f_welch, Pxx_welch = welch(xn, fs=Fs, window='hann', nperseg=256, noverlap=128, scaling='density')
 
-    # --- Plotting ---
+    #  Plotting 
     fig, axs = plt.subplots(1, 3, figsize=(15,4))
 
     # Time domain
-    axs[0].plot(time_axis, target)
+    axs[0].plot(time_axis, xn)
     axs[0].set_xlabel("Time [s]")
     axs[0].set_ylabel("Amplitude")
     axs[0].set_title("Time Domain Noise")

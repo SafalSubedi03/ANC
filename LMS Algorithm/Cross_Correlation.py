@@ -1,6 +1,6 @@
 import numpy as np 
 import matplotlib.pyplot as plt 
-from GaussianWhiteNoise import noise,target
+from SignalGeneration import noise,xn
 
 def crossCorelation(x_n,d_n):
     if len(x_n) != len(d_n): 
@@ -14,8 +14,9 @@ def crossCorelation(x_n,d_n):
         rdx[k] = sum/(N - abs(k))
     return rdx 
 
-desiredSignal = 0.8*target + 0.6*np.roll(target, 5) +0.9*np.roll(target, 29) + 0.1*np.random.randn(len(target))
-Cross_Corelation = crossCorelation(target,desiredSignal)
+desiredSignal = 0.8*xn + 0.6*np.roll(xn, 5) +0.9*np.roll(xn, 29) + 0.1*np.random.randn(len(xn))
+desiredSignalwithNoNoise = 0.8*xn + 0.6*np.roll(xn, 5) +0.9*np.roll(xn, 29)
+Cross_Corelation = crossCorelation(xn,desiredSignal)
 
 # Example usage
 if __name__ == "__main__":

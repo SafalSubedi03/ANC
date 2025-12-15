@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 from Cross_Correlation import Cross_Corelation, desiredSignal
 from AutoCorrelation import auto_Correlation
-from GaussianWhiteNoise import target
+from SignalGeneration import xn
 
 def build_R(r_x, M):
     """Construct the M×M Toeplitz autocorrelation matrix."""
@@ -26,7 +26,7 @@ def bestestimate_dn(w, x, M):
             d_hat[n] += w[k] * x[n - k]
     return d_hat
 
-M = 4
+M = 40
 
 R = build_R(auto_Correlation, M)
 p = build_p(Cross_Corelation, M)
@@ -36,13 +36,13 @@ try:
 except np.linalg.LinAlgError:
     w_opt = np.linalg.pinv(R).dot(p)
 
-d_hat = bestestimate_dn(w_opt, target, M)
+d_hat = bestestimate_dn(w_opt, xn, M)
 error = desiredSignal - d_hat
 
 fig, axs = plt.subplots(2, 2, figsize=(6, 6))
 
-k = np.arange(len(target))
-axs[0, 0].plot(k, target)
+k = np.arange(len(xn))
+axs[0, 0].plot(k, xn)
 axs[0, 0].set_title("Input Signal x[n]")
 
 k = np.arange(len(desiredSignal))

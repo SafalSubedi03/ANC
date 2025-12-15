@@ -1,5 +1,5 @@
 import numpy as np 
-from GaussianWhiteNoise import sin,noise,target
+from SignalGeneration import sin,noise,xn
 import matplotlib.pyplot as plt
 
 def autoCorrelation(x):
@@ -13,7 +13,7 @@ def autoCorrelation(x):
     return rx_k
 
 
-auto_Correlation = autoCorrelation(target)
+auto_Correlation = autoCorrelation(xn)
 #Visualization of Correlated and Uncorrelated Inputs
 if __name__ == "__main__":
     correlated_sample = sin[:-100]

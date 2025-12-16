@@ -20,7 +20,7 @@ def compute_yn(wn,M,xn,n):
 N = 3000
 xn = xn[:N]
 desiredSignal = desiredSignal[:N]
-desiredSignalwithNoNoise = desiredSignalwithNoNoise[:N]
+# desiredSignalwithNoNoise = desiredSignalwithNoNoise[:N]
 #Parameters
 M = 50 
 u = 0.02
@@ -39,7 +39,7 @@ for n in range(0,N):
 
 
 
-fig, axs = plt.subplots(2, 3, figsize=(6,6))
+fig, axs = plt.subplots(2, 2, figsize=(6,6))
 time_axis = np.arange(0,len(xn))
 # Time domain
 axs[0,0].plot(time_axis, xn)
@@ -64,10 +64,6 @@ axs[1,1].set_xlabel("Time [s]")
 axs[1,1].set_ylabel("Amplitude")
 axs[1,1].set_title("Time Domain desired Signal")
 
-axs[1,2].plot(time_axis, desiredSignalwithNoNoise)
-axs[1,2].set_xlabel("Time [s]")
-axs[1,2].set_ylabel("Amplitude")
-axs[1,2].set_title("Time Domain desired Signal with no noise")
 
 
 
